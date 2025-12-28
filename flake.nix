@@ -18,7 +18,7 @@
         else if isAttrs xs then mapAttrsToList f xs
         else throw "foreach: expected list or attrset but got ${typeOf xs}"
       );
-      ghc = "ghc9122";
+      ghc = "ghc9141";
       targetPrefix = "wasm32-wasi-";
       wasmPkgs = system: import inputs.nixpkgs rec {
         inherit system;
@@ -30,14 +30,15 @@
             buildPlatform
             hostPlatform
             targetPlatform;
-          cc = inputs.ghc-wasm-meta.packages.${system}.all_9_12 // {
+          cc = inputs.ghc-wasm-meta.packages.${system}.all_9_14 // {
             isGNU = false;
             isClang = true;
             libc = inputs.ghc-wasm-meta.packages.${system}.wasi-sdk.overrideAttrs (attrs: { pname = attrs.name; version = "unstable1"; });
             inherit targetPrefix;
-            bintools = inputs.ghc-wasm-meta.packages.${system}.all_9_12 // {
+            bintools = inputs.ghc-wasm-meta.packages.${system}.all_9_14 // {
+              dynamicLinker = "${inputs.ghc-wasm-meta.packages.${system}.all_9_14}/lld";
               inherit targetPrefix;
-              bintools = inputs.ghc-wasm-meta.packages.${system}.all_9_12 // {
+              bintools = inputs.ghc-wasm-meta.packages.${system}.all_9_14 // {
                 inherit targetPrefix;
               };
             };
@@ -45,10 +46,10 @@
         };
         crossOverlays = [
           (final: prev: {
-            cabal-install = inputs.ghc-wasm-meta.packages.${system}.wasm32-wasi-cabal-9_12;
+            cabal-install = inputs.ghc-wasm-meta.packages.${system}.wasm32-wasi-cabal-9_14;
             haskell = prev.haskell.override (old: {
               buildPackages = lib.recursiveUpdate old.buildPackages {
-                haskell.compiler.${ghc} = inputs.ghc-wasm-meta.packages.${system}.wasm32-wasi-ghc-9_12 // {
+                haskell.compiler.${ghc} = inputs.ghc-wasm-meta.packages.${system}.wasm32-wasi-ghc-9_14 // {
                   inherit targetPrefix;
                 };
               };
@@ -59,7 +60,7 @@
               packageOverrides = lib.composeManyExtensions [
                 prev.haskell.packageOverrides
                 (hfinal: hprev: {
-                  ghc = inputs.ghc-wasm-meta.packages.${system}.wasm32-wasi-ghc-9_12 // {
+                  ghc = inputs.ghc-wasm-meta.packages.${system}.wasm32-wasi-ghc-9_14 // {
                     inherit (inputs.nixpkgs.legacyPackages.${system}.haskell.packages.${ghc}.ghc) version haskellCompilerName;
                     inherit targetPrefix;
                   };
